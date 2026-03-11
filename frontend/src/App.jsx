@@ -8,7 +8,7 @@ import BidForm from "./components/BidForm";
 import Logout from "./components/Logout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useState, useEffect } from "react";
-import { AuthProvider } from "./contexts/index";
+import { AuthProvider } from "./contexts";
 import NavBar from "./components/NavBar";
 import Home from "./components/Home";
 import CreateAuctionItem from "./components/CreateAuctionItem";
