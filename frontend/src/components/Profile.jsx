@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { API } from "../api";
 import { Link } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 3;
@@ -24,7 +24,7 @@ function Profile() {
 				?.split("=")[1];
 			if (token) {
 				try {
-					const res = await axios.post(
+					const res = await API.post(
 						"/api/users/profile",
 						{},
 						{
@@ -45,7 +45,7 @@ function Profile() {
 				?.split("=")[1];
 			if (token) {
 				try {
-					const res = await axios.post(
+					const res = await API.post(
 						"/api/auctions/user",
 						{},
 						{
@@ -69,7 +69,7 @@ function Profile() {
 				?.split("=")[1];
 			if (token) {
 				try {
-					const res = await axios.post(
+					const res = await API.post(
 						"/api/bids/user",
 						{},
 						{
@@ -93,7 +93,7 @@ function Profile() {
 				?.split("=")[1];
 			if (token) {
 				try {
-					const res = await axios.post(
+					const res = await API.post(
 						"/api/auctions/won",
 						{},
 						{

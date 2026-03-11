@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import API from "../api";
+import { API } from "../api";
 import { useParams, useNavigate } from "react-router-dom";
 
 const BidForm = () => {

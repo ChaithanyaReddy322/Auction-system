@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../api";
+import { API } from "../api";
 import { Link } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 10;

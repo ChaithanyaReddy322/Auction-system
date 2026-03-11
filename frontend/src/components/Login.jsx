@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import API from "../api";
+import { API } from "../api";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { FiMail, FiLock } from "react-icons/fi";

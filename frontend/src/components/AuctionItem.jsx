@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../api";
+import { API } from "../api";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import "./AuctionItem.css";
 
