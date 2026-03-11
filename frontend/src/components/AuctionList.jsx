@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { Link } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 10;
@@ -13,11 +13,16 @@ function AuctionList() {
 
 	useEffect(() => {
 		const fetchAuctionItems = async () => {
-			const res = await axios.get("/api/auctions");
-			setAuctionItems(res.data);
-			setSearchResults(res.data);
-			setTotalPages(Math.ceil(res.data.length / ITEMS_PER_PAGE));
+			try {
+				const res = await API.get("/api/auctions");
+				setAuctionItems(res.data);
+				setSearchResults(res.data);
+				setTotalPages(Math.ceil(res.data.length / ITEMS_PER_PAGE));
+			} catch (error) {
+				console.error("Error fetching auctions:", error);
+			}
 		};
+
 		fetchAuctionItems();
 	}, []);
 
@@ -52,12 +57,14 @@ function AuctionList() {
 					matchesEndDate
 				);
 			});
+
 			setSearchResults(filteredItems);
 			setTotalPages(
 				Math.ceil(filteredItems.length / ITEMS_PER_PAGE) || 0
 			);
 			setCurrentPage(1);
 		};
+
 		filterItems();
 	}, [searchTerm, auctionItems]);
 
@@ -74,6 +81,7 @@ function AuctionList() {
 	return (
 		<div className="max-w-4xl mx-auto mt-10 p-6 bg-gray-900 text-white rounded-lg shadow-lg">
 			<h2 className="text-4xl font-bold mb-6">Auction Items</h2>
+
 			<div className="mb-6 flex flex-col gap-4">
 				<input
 					type="text"
@@ -83,6 +91,7 @@ function AuctionList() {
 					className="p-3 border border-gray-700 rounded-lg bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
 				/>
 			</div>
+
 			<ul className="space-y-4">
 				{paginatedItems.map((item) => (
 					<li
@@ -95,12 +104,15 @@ function AuctionList() {
 						>
 							{item.title}
 						</Link>
+
 						<p className="text-gray-300 mt-2">
 							<b>{item.description}</b>
 						</p>
+
 						<p className="text-gray-400 mt-2">
 							<b>Starting Bid:</b> ${item.startingBid}
 						</p>
+
 						<p className="text-gray-400 mt-2">
 							<b>End Date: </b>
 							{new Date(item.endDate).toLocaleDateString()}
@@ -108,22 +120,27 @@ function AuctionList() {
 					</li>
 				))}
 			</ul>
+
 			<div className="mt-6 flex justify-between items-center">
 				<button
 					onClick={() => handlePageChange(currentPage - 1)}
-					className={`bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-						currentPage === 1 ? "cursor-not-allowed opacity-50" : ""
+					className={`bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 ${
+						currentPage === 1
+							? "cursor-not-allowed opacity-50"
+							: ""
 					}`}
 					disabled={currentPage === 1}
 				>
 					Previous
 				</button>
+
 				<span className="text-gray-400">
-					Page {currentPage} of {totalPages == 0 ? 1 : totalPages}
+					Page {currentPage} of {totalPages === 0 ? 1 : totalPages}
 				</span>
+
 				<button
 					onClick={() => handlePageChange(currentPage + 1)}
-					className={`bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+					className={`bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 ${
 						totalPages === 0 || currentPage === totalPages
 							? "cursor-not-allowed opacity-50"
 							: ""

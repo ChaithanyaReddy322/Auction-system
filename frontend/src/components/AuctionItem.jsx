@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import "./AuctionItem.css";
 
@@ -25,7 +25,7 @@ function AuctionItem() {
 	useEffect(() => {
 		const fetchAuctionItem = async () => {
 			try {
-				const res = await axios.get(`/api/auctions/${id}`);
+				const res = await API.get(`/api/auctions/${id}`);
 				setAuctionItem(res.data);
 			} catch (error) {
 				console.error("Error fetching auction item:", error);
@@ -37,9 +37,10 @@ function AuctionItem() {
 				.split("; ")
 				.find((row) => row.startsWith("jwt="))
 				?.split("=")[1];
+
 			if (token) {
 				try {
-					const res = await axios.post(
+					const res = await API.post(
 						"/api/users/profile",
 						{},
 						{
@@ -55,10 +56,10 @@ function AuctionItem() {
 
 		const fetchWinner = async () => {
 			try {
-				const res = await axios.get(`/api/auctions/winner/${id}`);
+				const res = await API.get(`/api/auctions/winner/${id}`);
 				setWinner(res.data.winner);
 			} catch (error) {
-				if (error.response.data.winner !== "") {
+				if (error.response?.data?.winner !== "") {
 					console.error("Error fetching auction winner:", error);
 				}
 			}
@@ -73,10 +74,12 @@ function AuctionItem() {
 		const fetchBids = async () => {
 			setLoadingBids(true);
 			try {
-				const res = await axios.get(`/api/bids/${id}`);
+				const res = await API.get(`/api/bids/${id}`);
+
 				const sortedBids = res.data.sort(
 					(a, b) => b.bidAmount - a.bidAmount
 				);
+
 				setBids(sortedBids);
 				setTotalPages(
 					Math.ceil(sortedBids.length / ITEMS_PER_PAGE) || 0
@@ -101,7 +104,8 @@ function AuctionItem() {
 				if (timeDiff > 0) {
 					const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 					const hours = Math.floor(
-						(timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+						(timeDiff % (1000 * 60 * 60 * 24)) /
+							(1000 * 60 * 60)
 					);
 					const minutes = Math.floor(
 						(timeDiff % (1000 * 60 * 60)) / (1000 * 60)
@@ -110,7 +114,12 @@ function AuctionItem() {
 
 					setCountdown({ days, hours, minutes, seconds });
 				} else {
-					setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+					setCountdown({
+						days: 0,
+						hours: 0,
+						minutes: 0,
+						seconds: 0,
+					});
 				}
 			}
 		};
@@ -122,7 +131,7 @@ function AuctionItem() {
 
 	const handleDelete = async () => {
 		try {
-			await axios.delete(`/api/auctions/${id}`);
+			await API.delete(`/api/auctions/${id}`);
 			navigate("/auctions");
 		} catch (error) {
 			console.error("Error deleting auction item:", error);
@@ -145,6 +154,7 @@ function AuctionItem() {
 
 	const highestBid =
 		bids.length > 0 ? Math.max(...bids.map((bid) => bid.bidAmount)) : 0;
+
 	const isAuctionEnded =
 		countdown.days <= 0 &&
 		countdown.hours <= 0 &&
@@ -154,17 +164,21 @@ function AuctionItem() {
 	return (
 		<div className="max-w-4xl p-8 mx-auto mt-10 text-white bg-gray-900 rounded-lg shadow-lg">
 			<h2 className="mb-4 text-4xl font-bold">{auctionItem.title}</h2>
+
 			<p className="mb-4 text-lg">{auctionItem.description}</p>
+
 			<p className="mb-4 text-lg">
 				Starting Bid:{" "}
 				<span className="font-semibold">
 					${auctionItem.startingBid}
 				</span>
 			</p>
+
 			<p className="mb-4 text-lg">
 				Current Highest Bid:{" "}
 				<span className="font-semibold">${highestBid}</span>
 			</p>
+
 			<div
 				className={`text-center mb-4 p-6 rounded-lg shadow-lg ${
 					isAuctionEnded ? "bg-red-600" : "bg-green-600"
@@ -173,6 +187,7 @@ function AuctionItem() {
 				<h3 className="mb-2 text-3xl font-bold">
 					{isAuctionEnded ? "Auction Ended" : "Time Remaining"}
 				</h3>
+
 				<div className="countdown-grid">
 					{Object.entries(countdown).map(([unit, value]) => (
 						<div key={unit} className="countdown-card">
@@ -185,6 +200,7 @@ function AuctionItem() {
 						</div>
 					))}
 				</div>
+
 				{isAuctionEnded && winner && (
 					<div className="p-4 mt-6 font-bold text-center text-black bg-yellow-500 rounded-lg">
 						<h3 className="text-2xl">
@@ -195,6 +211,7 @@ function AuctionItem() {
 						</p>
 					</div>
 				)}
+
 				{isAuctionEnded && !winner && (
 					<div className="p-4 mt-6 font-bold text-center text-black bg-yellow-500 rounded-lg">
 						<h3 className="text-2xl">No Winner !</h3>
@@ -203,35 +220,38 @@ function AuctionItem() {
 			</div>
 
 			<h3 className="mb-4 text-3xl font-bold">Bids</h3>
+
 			{loadingBids ? (
 				<p className="text-xl text-gray-400">Loading bids...</p>
 			) : paginatedBids.length ? (
 				<div className="mb-6">
-					{paginatedBids.map((bid) => {
-						return (
-							<div
-								key={bid._id}
-								className="p-4 mb-4 bg-gray-700 rounded-lg"
-							>
-								<p className="text-lg">
-									<span className="font-semibold">
-										Bidder:
-									</span>{" "}
-									{bid.userId.username}
-								</p>
-								<p className="text-lg">
-									<span className="font-semibold">
-										Bid Amount:
-									</span>{" "}
-									${bid.bidAmount}
-								</p>
-							</div>
-						);
-					})}
+					{paginatedBids.map((bid) => (
+						<div
+							key={bid._id}
+							className="p-4 mb-4 bg-gray-700 rounded-lg"
+						>
+							<p className="text-lg">
+								<span className="font-semibold">
+									Bidder:
+								</span>{" "}
+								{bid.userId.username}
+							</p>
+
+							<p className="text-lg">
+								<span className="font-semibold">
+									Bid Amount:
+								</span>{" "}
+								${bid.bidAmount}
+							</p>
+						</div>
+					))}
+
 					<div className="flex items-center justify-between mt-6">
 						<button
-							onClick={() => handlePageChange(currentPage - 1)}
-							className={`bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+							onClick={() =>
+								handlePageChange(currentPage - 1)
+							}
+							className={`bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 ${
 								currentPage === 1 || totalPages === 0
 									? "cursor-not-allowed opacity-50"
 									: ""
@@ -240,19 +260,25 @@ function AuctionItem() {
 						>
 							Previous
 						</button>
-						<span className="text-gray-400 ext-center ">
+
+						<span className="text-gray-400">
 							Page {currentPage} of{" "}
 							{totalPages === 0 ? 1 : totalPages}
 						</span>
+
 						<button
-							onClick={() => handlePageChange(currentPage + 1)}
-							className={`bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-								totalPages === 0 || currentPage === totalPages
+							onClick={() =>
+								handlePageChange(currentPage + 1)
+							}
+							className={`bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 ${
+								totalPages === 0 ||
+								currentPage === totalPages
 									? "cursor-not-allowed opacity-50"
 									: ""
 							}`}
 							disabled={
-								totalPages === 0 || currentPage === totalPages
+								totalPages === 0 ||
+								currentPage === totalPages
 							}
 						>
 							Next
@@ -271,6 +297,7 @@ function AuctionItem() {
 					>
 						Edit
 					</Link>
+
 					<button
 						onClick={handleDelete}
 						className="px-6 py-3 text-white bg-red-700 rounded-lg hover:bg-red-800"
@@ -279,10 +306,11 @@ function AuctionItem() {
 					</button>
 				</div>
 			)}
+
 			{auctionItem.createdBy !== user.id && !isAuctionEnded && (
 				<Link
 					to={`/auction/bid/${id}`}
-					className="items-center justify-center block px-6 py-3 mt-6 text-center text-white bg-blue-700 rounded-lg ite hover:bg-blue-800"
+					className="items-center justify-center block px-6 py-3 mt-6 text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800"
 				>
 					Place a Bid
 				</Link>

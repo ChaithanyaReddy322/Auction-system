@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const cors = require("cors");
-const router = express.Router(); // Note: You may not need this router if you only use app.use() below.
+const router = express.Router();
 
 // Load environment variables (needed for local testing and Render builds)
 dotenv.config(); 
@@ -11,19 +11,25 @@ connectDB(); // Connects to MongoDB Atlas
 const app = express();
 app.use(express.json());
 
+// ----------------------------------------------------------------------
+// FINAL CORS FIX: Define a fallback origin to guarantee the Netlify URL is used.
+// This prevents the invalid 'multiple values' error if process.env.ORIGIN is corrupted/empty.
+const ALLOWED_ORIGIN = process.env.ORIGIN || 'https://biddbud.netlify.app';
+// ----------------------------------------------------------------------
+
 // CORS Configuration
 app.use(
-    cors({
-        // Uses the ORIGIN variable you set in the Render dashboard (e.g., https://your-netlify-site.netlify.app)
-        origin: process.env.ORIGIN,
-        methods: ["GET", "PUT", "POST", "DELETE"],
-        credentials: true,
-    })
+    cors({
+        // Use the clean allowed origin value
+        origin: ALLOWED_ORIGIN,
+        methods: ["GET", "PUT", "POST", "DELETE"],
+        credentials: true,
+    })
 );
 
 // Health Check Route for the Root URL
 app.get('/', (req, res) => {
-    res.status(200).send('Auction System API is running successfully!');
+    res.status(200).send('Auction System API is running successfully!');
 });
 
 // Primary API Routes

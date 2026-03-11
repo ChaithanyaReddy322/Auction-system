@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import API from "../api";
 import { useParams, useNavigate } from "react-router-dom";
 
 const BidForm = () => {
@@ -10,9 +10,13 @@ const BidForm = () => {
 
 	useEffect(() => {
 		const fetchAuctionItem = async () => {
-			const res = await axios.get(`/api/auctions/${id}`);
-			setAuctionItem(res.data);
-			setBidAmount(res.data.startingBid || "");
+			try {
+				const res = await API.get(`/api/auctions/${id}`);
+				setAuctionItem(res.data);
+				setBidAmount(res.data.startingBid || "");
+			} catch (error) {
+				console.error("Error fetching auction item:", error);
+			}
 		};
 
 		fetchAuctionItem();
@@ -20,19 +24,24 @@ const BidForm = () => {
 
 	const handleBid = async (e) => {
 		e.preventDefault();
+
 		try {
 			const token = document.cookie
 				.split("; ")
 				.find((row) => row.startsWith("jwt="))
 				?.split("=")[1];
-			await axios.post(
+
+			await API.post(
 				"/api/bids",
 				{ auctionItemId: id, bidAmount },
-				{ headers: { Authorization: `Bearer ${token}` } }
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				}
 			);
+
 			navigate(`/auction/${id}`);
 		} catch (err) {
-			console.error(err);
+			console.error("Error placing bid:", err);
 		}
 	};
 
@@ -43,19 +52,23 @@ const BidForm = () => {
 			<h2 className="mb-6 text-3xl font-extrabold text-gray-800">
 				Place a Bid
 			</h2>
+
 			<div className="p-4 mb-6 bg-gray-100 border border-gray-200 rounded-lg">
 				<p className="text-lg font-medium text-gray-700">
 					Starting Bid Amount:
 				</p>
+
 				<p className="text-2xl font-bold text-gray-900">
 					${auctionItem.startingBid.toFixed(2)}
 				</p>
 			</div>
+
 			<form onSubmit={handleBid} className="space-y-4">
 				<div>
 					<label className="block mb-2 text-lg font-medium text-gray-700">
 						Bid Amount
 					</label>
+
 					<input
 						type="number"
 						className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -65,6 +78,7 @@ const BidForm = () => {
 						required
 					/>
 				</div>
+
 				<button
 					type="submit"
 					className="w-full px-4 py-2 text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"

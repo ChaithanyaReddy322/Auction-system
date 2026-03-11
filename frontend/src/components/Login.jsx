@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import API from "../api";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { FiMail, FiLock } from "react-icons/fi";
@@ -22,19 +22,21 @@ function Login() {
 	const handleLogin = async (e) => {
 		e.preventDefault();
 		setLoading(true);
+
 		try {
-			const res = await axios.post(
+			const res = await API.post(
 				"/api/users/login",
 				{ email, password },
 				{ withCredentials: true }
 			);
+
 			if (res.status === 200) {
 				login();
 				navigate("/profile");
 			}
 		} catch (err) {
 			setError(err.response?.data?.message || "An error occurred");
-			console.error(err);
+			console.error("Login error:", err);
 		} finally {
 			setLoading(false);
 		}
@@ -52,9 +54,11 @@ function Login() {
 				<h2 className="mb-6 text-3xl font-semibold text-white text-center">
 					Login
 				</h2>
+
 				<form onSubmit={handleLogin} className="space-y-4">
 					<div className="flex items-center border rounded-md border-gray-600 bg-gray-700">
 						<FiMail className="w-6 h-6 text-gray-400 ml-3" />
+
 						<input
 							type="email"
 							className="w-full px-4 py-2 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -64,8 +68,10 @@ function Login() {
 							required
 						/>
 					</div>
+
 					<div className="flex items-center border rounded-md border-gray-600 bg-gray-700">
 						<FiLock className="w-6 h-6 text-gray-400 ml-3" />
+
 						<input
 							type="password"
 							className="w-full px-4 py-2 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -75,6 +81,7 @@ function Login() {
 							required
 						/>
 					</div>
+
 					<div className="flex items-center justify-between mt-4">
 						<p className="text-white">
 							Don{"'"}t have an account?{" "}
@@ -85,6 +92,7 @@ function Login() {
 								Signup
 							</Link>
 						</p>
+
 						<button
 							type="submit"
 							className="px-6 py-2 text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -98,6 +106,7 @@ function Login() {
 						</button>
 					</div>
 				</form>
+
 				{error && (
 					<div className="mt-4 text-red-300 text-center">{error}</div>
 				)}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { useNavigate } from "react-router-dom";
 
 const CreateAuctionItem = () => {
@@ -12,23 +12,26 @@ const CreateAuctionItem = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+
 		const token = document.cookie
 			.split("; ")
 			.find((row) => row.startsWith("jwt="))
 			?.split("=")[1];
+
 		if (token) {
 			try {
-				await axios.post(
+				await API.post(
 					"/api/auctions",
 					{ title, description, startingBid, endDate },
 					{
 						headers: { Authorization: `Bearer ${token}` },
 					}
 				);
+
 				navigate("/profile");
 			} catch (err) {
 				setError("Failed to create auction. Please try again.");
-				console.error(err);
+				console.error("Error creating auction:", err);
 			}
 		}
 	};
@@ -41,7 +44,11 @@ const CreateAuctionItem = () => {
 						<h2 className="text-3xl font-extrabold text-white mb-6">
 							Create Auction
 						</h2>
-						{error && <p className="text-red-500 mb-4">{error}</p>}
+
+						{error && (
+							<p className="text-red-500 mb-4">{error}</p>
+						)}
+
 						<form onSubmit={handleSubmit}>
 							<div className="mb-4">
 								<label
@@ -50,15 +57,19 @@ const CreateAuctionItem = () => {
 								>
 									Title
 								</label>
+
 								<input
 									id="title"
 									type="text"
 									value={title}
-									onChange={(e) => setTitle(e.target.value)}
+									onChange={(e) =>
+										setTitle(e.target.value)
+									}
 									className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-300"
 									required
 								/>
 							</div>
+
 							<div className="mb-4">
 								<label
 									htmlFor="description"
@@ -66,6 +77,7 @@ const CreateAuctionItem = () => {
 								>
 									Description
 								</label>
+
 								<textarea
 									id="description"
 									value={description}
@@ -76,6 +88,7 @@ const CreateAuctionItem = () => {
 									required
 								/>
 							</div>
+
 							<div className="mb-4">
 								<label
 									htmlFor="startingBid"
@@ -83,6 +96,7 @@ const CreateAuctionItem = () => {
 								>
 									Starting Bid ($)
 								</label>
+
 								<input
 									id="startingBid"
 									type="number"
@@ -95,6 +109,7 @@ const CreateAuctionItem = () => {
 									required
 								/>
 							</div>
+
 							<div className="mb-4">
 								<label
 									htmlFor="endDate"
@@ -102,15 +117,19 @@ const CreateAuctionItem = () => {
 								>
 									End Date
 								</label>
+
 								<input
 									id="endDate"
 									type="datetime-local"
 									value={endDate}
-									onChange={(e) => setEndDate(e.target.value)}
+									onChange={(e) =>
+										setEndDate(e.target.value)
+									}
 									className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-300"
 									required
 								/>
 							</div>
+
 							<button
 								type="submit"
 								className="inline-block bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition-colors duration-300 text-lg font-semibold"
